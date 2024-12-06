@@ -3,6 +3,16 @@
 #include <fstream>
 using namespace std;
 
+struct Book
+{
+		string titles;
+		string authors;
+		int years;
+		bool isBorrowed;
+};
+
+bool confirmChoice();
+
 			//			Menu Functions
 
 void header();
@@ -10,35 +20,34 @@ void option();
 		
 			// 			Admin Functions
 
-void addBook(string title[], string author[], int year[], bool isBorrow[], int& bookCount, int maxBook);
-void listBooks  (string titles[], string authors[], int years[], bool isBorrowed[], int& bookCount);
-void updateBooks(string titles[], string authors[], int years[], bool isBorrowed[], int& bookCount);
-void deleteBooks(string titles[], string authors[], int years[], bool isBorrowed[], int& bookCount);
+void addBook(Book books[], int& bookCount, int maxBook);
+void listBooks  (Book books[], int& bookCount);
+void updateBooks(Book books[], int& bookCount);
+void deleteBooks(Book books[], int& bookCount);
 
 			//			User Functions
 
-void searchBook(string titles[], string authors[], int years[], bool isBorrowed[], int& bookCount);
-void borrowBook(string titles[], string authors[], int years[], bool isBorrowed[], int& bookCount);
-void returnBook(string titles[], string authors[], int years[], bool isBorrowed[], int& bookCount);
+void searchBook(Book books[], int& bookCount);
+void borrowBook(Book books[], int& bookCount);
+void returnBook(Book books[], int& bookCount);
 
 			// 			File Handling Functions
 
-void saveBooksToFile  (string titles[], string authors[], int years[], bool isBorrowed[], int bookCount);
-void loadBooksFromFile(string titles[], string authors[], int years[], bool isBorrowed[], int& bookCount);
+void saveBooksToFile  (Book books[], int bookCount);
+void loadBooksFromFile(Book books[], int& bookCount);
+
+
 
 int main()
 {
 	int maxBooks = 100;
-    string titles[maxBooks];
-    string authors[maxBooks];
-    int years[maxBooks];
-    bool isBorrowed[maxBooks] = {false};
-    int bookCount = 0;
+	int bookCount = 0;
+	Book books[maxBooks];
 	string user, pwd;
     bool userSearchFlag = false;
 	char input = '0', loggedIn = '0';
 	
-	loadBooksFromFile(titles, authors, years, isBorrowed, bookCount);
+	loadBooksFromFile(books, bookCount);
 	
 	header();
 	
@@ -105,7 +114,7 @@ int main()
 				loggedIn = '7';
 				cout << "Thank you for using system" 
 					 << endl;
-				saveBooksToFile(titles, authors, years, isBorrowed, bookCount);
+				saveBooksToFile(books, bookCount);
 				break;
 			}
 			
@@ -147,25 +156,25 @@ int main()
 				{
 					case '1':
 					{
-						addBook(titles, authors, years, isBorrowed, bookCount, maxBooks);
+						addBook(books, bookCount, maxBooks);
 						break;
 					}
 					
 					case '2':
 					{
-						deleteBooks(titles, authors, years, isBorrowed, bookCount);
+						deleteBooks(books, bookCount);
 						break;
 					}
 					
 					case '3':
 					{
-						listBooks(titles, authors, years, isBorrowed, bookCount);
+						listBooks(books, bookCount);
 						break;
 					}
 					
 					case '4':
 					{
-						updateBooks(titles, authors, years, isBorrowed, bookCount);
+						updateBooks(books, bookCount);
 						break;
 					}
 					
@@ -174,7 +183,7 @@ int main()
 						cout <<endl 
 							 << "Logged out Successfully. " 
 							 << endl;
-						saveBooksToFile(titles, authors, years, isBorrowed, bookCount);
+						saveBooksToFile(books, bookCount);
 						break;
 					}
 					
@@ -223,27 +232,27 @@ int main()
 				{
 					case '1':
 					{
-						listBooks(titles, authors, years, isBorrowed, bookCount);
+						listBooks(books, bookCount);
 						break;
 					}
 					
 					case '2':
 					{
-						searchBook(titles, authors, years, isBorrowed, bookCount);
+						searchBook(books, bookCount);
 						break;
 					}
 					
 					case '3':
 					{
-						borrowBook(titles, authors, years, isBorrowed, bookCount);
-						saveBooksToFile(titles, authors, years, isBorrowed, bookCount);
+						borrowBook(books, bookCount);
+						saveBooksToFile(books, bookCount);
 						break;
 					}
 					
 					case '4':
 					{
-						returnBook(titles, authors, years, isBorrowed, bookCount);
-						saveBooksToFile(titles, authors, years, isBorrowed, bookCount);
+						returnBook(books, bookCount);
+						saveBooksToFile(books, bookCount);
 						break;
 					}
 					
@@ -252,7 +261,7 @@ int main()
 						cout <<endl 
 							 << "Thank you for using the system. " 
 							 << endl;
-						saveBooksToFile(titles, authors, years, isBorrowed, bookCount);
+						saveBooksToFile(books, bookCount);
 						break;
 					}
 					
@@ -302,7 +311,7 @@ void option()
 }
 
 
-void addBook(string titles[], string authors[], int years[], bool isBorrowed[], int& bookCount, int maxBooks)
+void addBook(Book books[], int& bookCount, int maxBooks)
 {
 	if(bookCount >= maxBooks)
 	{
@@ -317,15 +326,15 @@ void addBook(string titles[], string authors[], int years[], bool isBorrowed[], 
 	
 	cout << endl
 		 << " Enter the title of the book: ";
-	getline(cin,titles[bookCount]);
+	getline(cin,books[bookCount].titles);
 	cout << endl
 		 << " Enter the name of the author: ";
-	getline(cin,authors[bookCount]);
+	getline(cin,books[bookCount].authors);
 	cout << endl
 		 << " Enter the year of publication: ";
-	cin  >> years[bookCount];
+	cin  >> books[bookCount].years;
 	
-	isBorrowed[bookCount] = {false};
+	books[bookCount].isBorrowed = {false};
 	
 	bookCount++;
 	
@@ -335,7 +344,7 @@ void addBook(string titles[], string authors[], int years[], bool isBorrowed[], 
 }
 
 
-void listBooks(string titles[], string authors[], int years[], bool isBorrowed[], int& bookCount)
+void listBooks(Book books[], int& bookCount)
 {
 	
 	if(bookCount == 0)
@@ -355,12 +364,12 @@ void listBooks(string titles[], string authors[], int years[], bool isBorrowed[]
 	for(int i = 0; i < bookCount; i++)
 	{
 		cout << i+1 << ".  " 
-				    << titles[i] 
+				    << books[i].titles 
 					<<"\t\t\t" 
-					<< authors[i] 
+					<< books[i].authors 
 					<<"\t\t\t"
-					<< years[i] 
-					<< (isBorrowed[i]? "\t\t [Borrowed]":"\t\t [Available]")
+					<< books[i].years 
+					<< (books[i].isBorrowed? "\t\t [Borrowed]":"\t\t [Available]")
 			 << endl;
 	}
 		 
@@ -368,7 +377,7 @@ void listBooks(string titles[], string authors[], int years[], bool isBorrowed[]
 }
 
 
-void updateBooks(string titles[], string authors[], int years[], bool isBorrowed[], int& bookCount)
+void updateBooks(Book books[], int& bookCount)
 {
 	if(bookCount == 0)
 	{
@@ -379,7 +388,7 @@ void updateBooks(string titles[], string authors[], int years[], bool isBorrowed
 		return;
 	}
 	
-	listBooks(titles, authors, years, isBorrowed, bookCount);
+	listBooks(books, bookCount);
 	
 	int index, newYear;
 	string newTitle, newAuthor;
@@ -398,7 +407,7 @@ void updateBooks(string titles[], string authors[], int years[], bool isBorrowed
 		
 		if(newTitle != "0")
 		{
-			titles[index] = newTitle;
+			books[index].titles = newTitle;
 		}
 		
 		cout << endl 
@@ -407,7 +416,7 @@ void updateBooks(string titles[], string authors[], int years[], bool isBorrowed
 		
 		if(newAuthor != "0")
 		{
-			authors[index] = newAuthor;
+			books[index].authors = newAuthor;
 		}
 		
 		cout << endl 
@@ -416,7 +425,7 @@ void updateBooks(string titles[], string authors[], int years[], bool isBorrowed
 		
 		if(newYear > 0)
 		{
-			years[index] = newYear;
+			books[index].years = newYear;
 		}
 		
 		cout << endl
@@ -431,7 +440,7 @@ void updateBooks(string titles[], string authors[], int years[], bool isBorrowed
 	}
 }
 
-void deleteBooks(string titles[], string authors[], int years[], bool isBorrowed[], int& bookCount)
+void deleteBooks(Book books[], int& bookCount)
 {
 	if(bookCount == 0)
 	{
@@ -441,7 +450,7 @@ void deleteBooks(string titles[], string authors[], int years[], bool isBorrowed
 		return;
 	}
 	
-	listBooks(titles, authors, years, isBorrowed, bookCount);
+	listBooks(books, bookCount);
 	
 	int index;
 	
@@ -450,30 +459,41 @@ void deleteBooks(string titles[], string authors[], int years[], bool isBorrowed
 	cin  >> index;
 	index --;
 	
-	if(index >= 0 && index < bookCount)
+	bool choice = confirmChoice();
+	
+	if(choice)
 	{
-		for(int i = index; i < bookCount-1; i++)
+		if(index >= 0 && index < bookCount)
 		{
-			titles[i]     = titles[i+1];
-			authors[i]    = authors[i+1];
-			years[i]      = years[i+1];
-			isBorrowed[i] = isBorrowed[i+1];
+			for(int i = index; i < bookCount-1; i++)
+			{
+				books[i].titles     = books[i+1].titles;
+				books[i].authors    = books[i+1].authors;
+				books[i].years      = books[i+1].years;
+				books[i].isBorrowed = books[i+1].isBorrowed;
+			}
+			
+			bookCount--;
+			cout << endl
+				 << " Book Deleted Successfully."
+				 << endl;
 		}
-		
-		bookCount--;
-		cout << endl
-			 << " Book Deleted Successfully."
-			 << endl;
+		else
+		{
+			cout <<endl
+				 << " Invalid Input."
+				 <<endl;
+		}
 	}
 	else
 	{
-		cout <<endl
-			 << " Invalid Input."
-			 <<endl;
+		cout << endl
+			 << " The book is not deleted."
+			 << endl;
 	}
 }
 
-void searchBook(string titles[], string authors[], int years[], bool isBorrowed[], int& bookCount)
+void searchBook(Book books[], int& bookCount)
 {
 	if(bookCount == 0)
 	{
@@ -493,7 +513,7 @@ void searchBook(string titles[], string authors[], int years[], bool isBorrowed[
 	
 	for(int i = 0; i < bookCount; i++)
 	{
-		if(titles[i].find(search) != string::npos)
+		if(books[i].titles.find(search) != string::npos)
 		{
 			cout <<endl << "*******************************************************************************************"
 				 <<endl << "   Book Title                Author Name           Year of Publish         Status          "
@@ -501,12 +521,12 @@ void searchBook(string titles[], string authors[], int years[], bool isBorrowed[
 				 <<endl;
 				 
 			cout << i+1 << ".  "
-						<< titles[i] 
+						<< books[i].titles 
 						<<"\t\t\t" 
-						<< authors[i] 
+						<< books[i].authors 
 						<<"\t\t\t"
-						<< years[i] 
-						<< (isBorrowed[i]? "\t\t [Borrowed]":"\t\t [Available]")
+						<< books[i].years
+						<< (books[i].isBorrowed? "\t\t [Borrowed]":"\t\t [Available]")
 				 << endl;
 				 
 			return;
@@ -518,7 +538,7 @@ void searchBook(string titles[], string authors[], int years[], bool isBorrowed[
 		 << endl;
 }
 	
-void borrowBook(string titles[], string authors[], int years[], bool isBorrowed[], int& bookCount)
+void borrowBook(Book books[], int& bookCount)
 {
 	if(bookCount == 0)
 	{
@@ -529,84 +549,139 @@ void borrowBook(string titles[], string authors[], int years[], bool isBorrowed[
 		return;
 	}
 	
-	listBooks(titles, authors, years, isBorrowed, bookCount);
+	listBooks(books, bookCount);
 	
 	int index;
 	
 	cout <<endl
 		 << "Enter the number of the book which you want to Borrow: ";
 	cin  >> index;
-	index --;
 	
-	if(index >= 0 && index < bookCount)
+	if (cin.fail()) 
 	{
-		if(!isBorrowed[index])
+		cin.clear();
+		cin.ignore(1000, '\n'); 
+		cout << endl
+			 << "Invalid choice!" 
+			 << endl;
+		return;
+	}
+	
+	index --;
+	bool choice = confirmChoice();
+	
+	if(choice)
+	{
+		if(index >= 0 && index < bookCount)
 		{
-			isBorrowed[index] = true;
-			cout << endl
-				 << " You have borrowed the book."
-				 <<endl;
+			if(!books[index].isBorrowed)
+			{
+				books[index].isBorrowed = true;
+				cout << endl
+					 << " You have borrowed the book."
+					 <<endl;
+			}
+			else
+			{
+				cout << endl
+					 << " The book is already borrowed."
+					 <<endl;
+			}
 		}
 		else
 		{
 			cout << endl
-				 << " The book is already borrowed."
+				 << " Invalid Input"
 				 <<endl;
 		}
 	}
 	else
 	{
 		cout << endl
-			 << " Invalid Input"
-			 <<endl;
+			 << " The book is not borrowed."
+			 << endl;
 	}
+	
 }
 
-void returnBook(string titles[], string authors[], int years[], bool isBorrowed[], int& bookCount)
+void returnBook(Book books[], int& bookCount)
 {
+	bool flag = false;
+	
 	if(bookCount == 0)
 	{
 		cout << endl
-			 << " No Book Available to Borrow."
+			 << " There is no Book that is Borrow."
 			 << endl;
 		
 		return;
 	}
 	
-	listBooks(titles, authors, years, isBorrowed, bookCount);
-	
-	int index;
-	
-	cout <<endl
-		 << "Enter the number of the book which you want to Return: ";
-	cin  >> index;
-	index --;
-	
-	if(index >= 0 && index < bookCount)
+	for(int i = 0; i < bookCount; i++)
 	{
-		if(isBorrowed[index])
+		if(books[i].isBorrowed)
 		{
-			isBorrowed[index] = false;
+			flag = true;
+			break;
+		}
+	}
+	
+	if(flag)
+	{
+		listBooks(books, bookCount);
+		
+		int index;
+		
+		cout <<endl
+			 << "Enter the number of the book which you want to Return: ";
+		cin  >> index;
+		
+		if (cin.fail()) 
+		{
+			cin.clear();
+			cin.ignore(1000, '\n'); 
 			cout << endl
-				 << " You have returned the book."
-				 <<endl;
+				 << "Invalid choice!" 
+				 << endl;
+			return;
+		}
+		
+		index --;
+		
+		if(index >= 0 && index < bookCount)
+		{
+			if(books[index].isBorrowed)
+			{
+				books[index].isBorrowed = false;
+				cout << endl
+					 << " You have returned the book."
+					 <<endl;
+			}
+			else
+			{
+				cout << endl
+					 << " The book is not borrowed."
+					 <<endl;
+			}
 		}
 		else
 		{
 			cout << endl
-				 << " The book is not borrowed."
+				 << " Invalid Input"
 				 <<endl;
 		}
 	}
 	else
 	{
 		cout << endl
-			 << " Invalid Input"
-			 <<endl;
+			 << " No Borrow Book to Return."
+			 << endl;
+		
+		return;
 	}
 }
 
-void saveBooksToFile(string titles[], string authors[], int years[], bool isBorrowed[], int bookCount)
+void saveBooksToFile(Book books[], int bookCount)
 {
 	ofstream fout("Books.txt");
 	
@@ -622,20 +697,20 @@ void saveBooksToFile(string titles[], string authors[], int years[], bool isBorr
 	
 	for(int i = 0; i < bookCount; i++)
 	{
-		fout << titles[i]
+		fout << books[i].titles
 			 << endl
-			 << authors[i]
+			 << books[i].authors
 			 << endl
-			 << years[i]
+			 << books[i].years
 			 << endl
-			 << isBorrowed[i]
+			 << books[i].isBorrowed
 			 << endl;
 	}
 	
 	fout.close();
 }
 
-void loadBooksFromFile(string titles[], string authors[], int years[], bool isBorrowed[], int& bookCount)
+void loadBooksFromFile(Book books[], int& bookCount)
 {
 	ifstream fin("Books.txt");
 	
@@ -652,12 +727,29 @@ void loadBooksFromFile(string titles[], string authors[], int years[], bool isBo
 	
 	for(int i = 0; i < bookCount; i++)
 	{
-		getline(fin,titles[i]);
-		getline(fin,authors[i]);
-		fin >> years[i];
-		fin >> isBorrowed[i];
+		getline(fin,books[i].titles);
+		getline(fin,books[i].authors);
+		fin >> books[i].years;
+		fin >> books[i].isBorrowed;
 		fin.ignore();
 	}
 	
 	fin.close();
+}
+
+bool confirmChoice()
+{
+	char choice;
+	cout << endl
+		 << " Are you sure (y/n):";
+	cin  >> choice;
+	
+	if(choice == 'y' || choice == 'Y')
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
